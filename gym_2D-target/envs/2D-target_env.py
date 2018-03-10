@@ -61,7 +61,3 @@ class target_2D_env(gym.Env):
 			self.state[action/2] += 2((action%2)-0.5)*stepSize
 		self.lastLambda = self.state[-1]
 		self.state[-1] = np.min(self.state[-1], target(self.state[:2]))
-
-test = target_2D_env()
-test._reset
-test._step
