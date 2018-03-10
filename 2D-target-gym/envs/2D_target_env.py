@@ -34,7 +34,7 @@ class Target_2D_Env(gym.Env):
 			return np.append(point, np.zeros(stateDim - 3), self.target(point))
 
 	def _get_reward(self):
-		return self.state[-1] - self.lastLambda
+		return self.lastLambda - self.state[-1] #formulation is reverse so that reward can be maximized
 
 	def _step(self, action):
 		self._take_action(action)
@@ -58,6 +58,14 @@ class Target_2D_Env(gym.Env):
 
 	def _take_action(self, action):
 		if action != 5:
-			self.state[action/2] += 2((action%2)-0.5)*stepSize
+			self.state[action/2] += 2((action%2)-0.5)*stepSize 
 		self.lastLambda = self.state[-1]
 		self.state[-1] = np.min(self.state[-1], target(self.state[:2]))
+
+	def _render(self):
+		#TODO
+		pass
+
+	def seed(self):
+		#TODO
+		pass
