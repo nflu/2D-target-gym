@@ -2,7 +2,7 @@ import numpy as np
 import gym 
 from gym import spaces
 
-class target_2D_env(gym.Env):
+class Target_2D_Env(gym.Env):
 
 	def __init__(self):
 		
