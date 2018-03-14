@@ -1,1 +1,1 @@
-from 2D-target-gym.envs.target_2D_env import Target_2D_Env
+from gym_target.envs.target_env import TargetEnv

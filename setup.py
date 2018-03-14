@@ -1,5 +1,5 @@
 setuptools import setup
 
-setup(name="2D-target-gym",
+setup(name="gym_target",
       version="0.0.1",
       install_requires=["gym","numpy"])
