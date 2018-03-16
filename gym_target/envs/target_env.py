@@ -21,6 +21,7 @@ class TargetEnv(gym.Env):
 		#the dimension of the box must also increase.
 		self.action_space = spaces.Discrete(5) #left, right, down, up, don't move
 		self.observation_space = spaces.Box(low = -self.high, high = self.high, dtype = np.float32)
+		self.curr_step = 0
 
 	def randomPoint(self):
 		point = np.zeros(2)
@@ -67,16 +68,16 @@ class TargetEnv(gym.Env):
 
 	def _render(self, mode="human", close=False):
 		# I have this problem currently https://github.com/openai/gym/issues/893
-		# I tried the fix but it doesn't work 
+		# The fix is to use _close() before close() is called  
 		if self.viewer is None:
 			from gym.envs.classic_control import rendering
 			self.viewer = rendering.Viewer(int(2*self.high[0]), int(2*self.high[1]))
 			self.viewer.set_bounds(-self.high[0], self.high[0], -self.high[1], self.high[1])
-			target = rendering.make_circle(1)
+			target = rendering.make_circle(2)
 			target.add_attr(rendering.Transform(translation=self.targetPoint))
 			target.set_color(0,0,0)
 			self.viewer.add_geom(target)
-			agent = rendering.make_circle(1)
+			agent = rendering.make_circle(2)
 			self.agent_translation = rendering.Transform(translation=self.state[:2])
 			agent.add_attr(self.agent_translation)
 			agent.set_color(1,0,0)
@@ -85,6 +86,11 @@ class TargetEnv(gym.Env):
 			self.agent_translation.set_translation(self.state[0], self.state[1])
 
 		return self.viewer.render(return_rgb_array = mode=='rgb_array')
+
+	def _close(self):
+		if self.viewer is not None:
+			self.viewer.close()
+			self.viewer = None
 
 	def _seed(self):
 		#TODO
