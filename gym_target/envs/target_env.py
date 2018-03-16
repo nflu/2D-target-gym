@@ -8,7 +8,7 @@ class TargetEnv(gym.Env):
 		
 		# defines size of environment, dimension, and time step size
 		self.timeHorizon = 500
-		self.stepSize = 1
+		self.stepSize = 1.0
 		boxSizeX = 100.0
 		boxSizeY = 100.0
 		maxLambda = np.sqrt((2*boxSizeX)**2 + (2*boxSizeY)**2)
@@ -60,18 +60,29 @@ class TargetEnv(gym.Env):
 		return ob
 
 	def _take_action(self, action):
-		if action != 5:
+		if action != 4:
 			self.state[action//2] += 2 * ((action % 2)-0.5)*self.stepSize 
 		self.lastLambda = self.state[-1]
 		self.state[-1] = min(self.state[-1], self.target(self.state[:2]))
 
 	def _render(self, mode="human", close=False):
-		from gym.envs.classic_control import rendering
+		# I have this problem currently https://github.com/openai/gym/issues/893
+		# I tried the fix but it doesn't work 
 		if self.viewer is None:
-			self.viewer = rendering.Viewer(2*self.high[0], 2*self.high[1])
+			from gym.envs.classic_control import rendering
+			self.viewer = rendering.Viewer(int(2*self.high[0]), int(2*self.high[1]))
 			self.viewer.set_bounds(-self.high[0], self.high[0], -self.high[1], self.high[1])
 			target = rendering.make_circle(1)
 			target.add_attr(rendering.Transform(translation=self.targetPoint))
+			target.set_color(0,0,0)
+			self.viewer.add_geom(target)
+			agent = rendering.make_circle(1)
+			self.agent_translation = rendering.Transform(translation=self.state[:2])
+			agent.add_attr(self.agent_translation)
+			agent.set_color(1,0,0)
+			self.viewer.add_geom(agent)
+		else:
+			self.agent_translation.set_translation(self.state[0], self.state[1])
 
 		return self.viewer.render(return_rgb_array = mode=='rgb_array')
 
