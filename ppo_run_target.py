@@ -24,7 +24,7 @@ def train(env_id, num_timesteps, render_timesteps, render_time, seed):
              lam=0.95, schedule='linear'
         )
 	dir  = logger.get_dir()
-	with open("data/data_directories.txt", 'a') as file:
+	with open("scripts/data/data_directories.txt", 'a') as file:
 		file.write(dir+"\n")
 	results_plotter_terminal.plot_results([dir], num_timesteps, results_plotter_terminal.X_TIMESTEPS, "Target Set Gridworld") 
 	#for this to have at least 99 episodes. See line 20 in rolling_window in results_plotter.py from open ai baselines 
