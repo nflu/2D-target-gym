@@ -1,5 +1,6 @@
 #the version in the open AI baselines doesn't have plt.show() outside of main so it is impossible to use 
-#this to plot results from other files
+#this to plot results from other files. Thus I put plt.show() in the plot_results function so it can be used
+#like the example usage suggests
 import numpy as np
 import matplotlib
 matplotlib.use('TkAgg') # Can change to 'Agg' for non-interactive mode
