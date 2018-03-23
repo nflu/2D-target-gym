@@ -2,36 +2,38 @@ import numpy as np
 import gym 
 from gym import spaces
 
-class TargetEnv(gym.Env):
+class TargetDynamicsEnv(gym.Env):
 
 	def __init__(self):
 		
 		# defines size of environment, dimension, and time step size
 		self.timeHorizon = 500
-		self.stepSize = 1.0
 		boxSizeX = 100.0
 		boxSizeY = 100.0
-		maxLambda = np.sqrt((2*boxSizeX)**2 + (2*boxSizeY)**2)
-		self.high = np.array([boxSizeX, boxSizeY, maxLambda, boxSizeX, boxSizeY])
+		self.timestep_size = 0.01
+		maxLambda = np.sqrt((2*boxSizeX)**2 + (2*boxSizeY)**2) #maximum distance between any two points in the space
+		maxVelocity = maxLambda / self.timestep_size #velocity to move the maximum distance in minimum time
+		maxAccel = maxVelocity / self.timestep_size
+		self.high = np.array([boxSizeX, boxSizeY, maxVelocity, maxVelocity, maxLambda, boxSizeX, boxSizeY, 2*np.pi, maxAccel])
 		#note that this describes the limits on the observation space.
 		#right now the observation space is the state vector concatenated with the target set point
-		self.stateDim = 3 #simple version only takes steps for now
-		#must be at least 3 : (x, y, lambda)
+		self.stateDim = 5
+		#(x, y, x', y', lambda)
 		#if the dimension is increased and the new dimensions will be used in the observation
 		#the dimension of the box must also increase.
-		self.action_space = spaces.Discrete(5) #left, right, down, up, don't move
-		self.observation_space = spaces.Box(low = -self.high, high = self.high, dtype = np.float32)
+		self.action_space = spaces.Box(low = -self.high[-2:], high = self.high[-2:]) #direction and magnitude
+		self.observation_space = spaces.Box(low = -self.high[:self.stateDim+2], high = self.high[:self.stateDim+2], dtype = np.float32)
 		self.curr_step = 0
 
 	def randomPoint(self):
 		point = np.zeros(2)
-		point[0] = np.random.randint(low = -self.high[0], high = self.high[0]) #for now this will be gridworld
+		point[0] = np.random.randint(low = -self.high[0], high = self.high[0])
 		point[1] = np.random.randint(low = -self.high[1], high = self.high[1])
 		return point
 
 	def randomState(self):
 		point = self.randomPoint()
-		return np.append(point, self.target(point))
+		return np.append(np.append(point, np.zeros(self.stateDim - 3)), self.target(point)) #start at stationary point
 
 	def _get_reward(self):
 		return self.lastLambda - self.state[-1] #formulation is negated so that reward can be maximized
@@ -58,11 +60,10 @@ class TargetEnv(gym.Env):
 		return ob
 
 	def _take_action(self, action):
-		if action != 4:
-			self.state[action//2] += 2 * ((action % 2)-0.5)*self.stepSize
-		if abs(self.state[0]) > self.high[0] or abs(self.state[1]) > self.high[1]: #bounce off walls
-			i = np.argmax(np.absolute(self.state[:2]))
-			self.state[i] -= np.sign(self.state[i])*self.stepSize
+		self.state[0] = self.state[0] + self.timestep_size * self.state[2]
+		self.state[1] = self.state[1] + self.timestep_size * self.state[3]
+		self.state[2] = self.state[2] + self.timestep_size * np.cos(action[0]) * action[1]
+		self.state[3] = self.state[3] + self.timestep_size * np.sin(action[0]) * action[1]
 		self.lastLambda = self.state[-1]
 		self.state[-1] = min(self.state[-1], self.target(self.state[:2]))
 
@@ -74,8 +75,7 @@ class TargetEnv(gym.Env):
 			self.viewer = rendering.Viewer(int(2*self.high[0]), int(2*self.high[1]))
 			self.viewer.set_bounds(-self.high[0], self.high[0], -self.high[1], self.high[1])
 			target = rendering.make_circle(2)
-			self.target_translation = rendering.Transform(translation=self.targetPoint)
-			target.add_attr(self.target_translation)
+			target.add_attr(rendering.Transform(translation=self.targetPoint))
 			target.set_color(0,0,0)
 			self.viewer.add_geom(target)
 			agent = rendering.make_circle(2)
@@ -85,7 +85,6 @@ class TargetEnv(gym.Env):
 			self.viewer.add_geom(agent)
 		else:
 			self.agent_translation.set_translation(self.state[0], self.state[1])
-			self.target_translation.set_translation(self.targetPoint[0], self.targetPoint[1])
 
 		return self.viewer.render(return_rgb_array = mode=='rgb_array')
 
