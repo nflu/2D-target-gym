@@ -6,5 +6,5 @@ register(
 )
 register(
 	id="target-dynamics-v0",
-	entry_point="gym_target.envs.TargetDynamicsEnv",
+	entry_point="gym_target.envs:TargetDynamicsEnv",
 )
