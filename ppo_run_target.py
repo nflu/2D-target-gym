@@ -2,11 +2,11 @@ from baselines.common import tf_util as U
 from baselines import logger
 from baselines.ppo1 import mlp_policy
 from baselines import bench
-import pposgd_simple_render
+from openai_modified import pposgd_simple_render
 import gym
 import gym_target
 import argparse
-import results_plotter_terminal
+from  openai_modified import results_plotter_terminal
 
 
 def train(env_id, num_timesteps, render_timesteps, render_time, seed):
@@ -19,12 +19,12 @@ def train(env_id, num_timesteps, render_timesteps, render_time, seed):
 	pposgd_simple_render.learn(env, policy_fn, 
 		max_timesteps = num_timesteps, render_timesteps = render_timesteps,
 		render_time = render_time, gamma=1.0, timesteps_per_actorbatch = 100,
-		clip_param=0.20, entcoeff=0.01,
-            optim_epochs=10, optim_stepsize=3e-4, optim_batchsize=64,
+		clip_param=0.10, entcoeff=0.02,
+            optim_epochs=10, optim_stepsize=5e-4, optim_batchsize=64,
              lam=0.95, schedule='linear'
         )
 	dir  = logger.get_dir()
-	with open("data_directories.txt", 'a') as file:
+	with open("data/data_directories.txt", 'a') as file:
 		file.write(dir+"\n")
 	results_plotter_terminal.plot_results([dir], num_timesteps, results_plotter_terminal.X_TIMESTEPS, "Target Set Gridworld") 
 	#for this to have at least 99 episodes. See line 20 in rolling_window in results_plotter.py from open ai baselines 
