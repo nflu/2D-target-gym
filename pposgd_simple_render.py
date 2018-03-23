@@ -1,3 +1,7 @@
+#This is just a really hacky version of pposgd_simple.py from the Open AI baselines 
+#so that it will render the last render_timesteps. I will reformat this soon but the best solution
+#is to save the model and then render in another file. 
+
 from baselines.common import Dataset, explained_variance, fmt_row, zipsame
 from baselines import logger
 import baselines.common.tf_util as U
@@ -55,7 +59,7 @@ def traj_segment_generator(pi, env, horizon, stochastic):
         global max_timestep
         global render_period
         if max_timestep and render_timestep and timestep_so_far >= max_timestep - render_timestep:
-            env._render()
+            env.env._render()
             sleep(render_period)
 
         rews[i] = rew
@@ -96,7 +100,7 @@ def learn(env, policy_fn, *,
         adam_epsilon=1e-5,
         schedule='constant', # annealing for stepsize parameters (epsilon and adam)
         render_timesteps = 0, #will render the last render_timesteps
-        render_time = 0 #will pause on each frame for at least this time
+        render_time = 0, #will pause on each frame for at least this time
         ):
     # Setup losses and stuff
     # ----------------------------------------
