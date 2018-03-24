@@ -13,7 +13,8 @@ class TargetDynamicsEnv(gym.Env):
 		self.timestep_size = 0.01
 		maxLambda = np.sqrt((2*boxSizeX)**2 + (2*boxSizeY)**2) #maximum distance between any two points in the space
 		maxVelocity = maxLambda / self.timestep_size #velocity to move the maximum distance in minimum time
-		maxAccel = maxVelocity / self.timestep_size
+		#maxAccel = maxVelocity / self.timestep_size #I think this is unreasonably high
+		maxAccel = 100.0
 		self.high = np.array([boxSizeX, boxSizeY, maxVelocity, maxVelocity, maxLambda, boxSizeX, boxSizeY, 2*np.pi, maxAccel])
 		#note that this describes the limits on the observation space.
 		#right now the observation space is the state vector concatenated with the target set point
@@ -64,6 +65,10 @@ class TargetDynamicsEnv(gym.Env):
 		self.state[1] = self.state[1] + self.timestep_size * self.state[3]
 		self.state[2] = self.state[2] + self.timestep_size * np.cos(action[0]) * action[1]
 		self.state[3] = self.state[3] + self.timestep_size * np.sin(action[0]) * action[1]
+		if abs(self.state[0]) > self.high[0]:
+			self.state[2] = -self.state[2]
+		if abs(self.state[1]) > self.high[1]:
+			self.state[3] = -self.state[3]
 		self.lastLambda = self.state[-1]
 		self.state[-1] = min(self.state[-1], self.target(self.state[:2]))
 

@@ -16,6 +16,7 @@ def main():
 		for line in f:
 			line = line[:-1] #need to remove whitespace at end of file name
 			l.append(line)
+		#TODO find the set of tasks and then group files according to task and number of time steps and then plot each like that
 		results_plotter_terminal.plot_results(l, args.num_timesteps, results_plotter_terminal.X_TIMESTEPS, args.task) 
 	
 if __name__ == '__main__':

@@ -9,13 +9,18 @@ import argparse
 from  openai_modified import results_plotter_terminal
 
 
-def train(env_id, num_timesteps, render_timesteps, render_time, seed):
+def train(env_id, num_timesteps, render_timesteps, render_time, task, seed):
 	U.make_session(num_cpu=1).__enter__()
 	def policy_fn(name, ob_space, ac_space):
 		return mlp_policy.MlpPolicy(name=name, ob_space=ob_space, ac_space=ac_space,
 			hid_size = 64, num_hid_layers = 2)
 	logger.configure()
-	env = bench.Monitor(gym.make("target-v0"), logger.get_dir())
+	if task == "grid":
+		env = bench.Monitor(gym.make("target-v0"), logger.get_dir())
+	elif task == "dynamics":
+		env = bench.Monitor(gym.make("target-dynamics-v0"), logger.get_dir())
+	else:
+		raise ValueError("task should be either grid or dynamics instead " + task + " was given.")
 	pposgd_simple_render.learn(env, policy_fn, 
 		max_timesteps = num_timesteps, render_timesteps = render_timesteps,
 		render_time = render_time, gamma=1.0, timesteps_per_actorbatch = 5000,
@@ -26,6 +31,8 @@ def train(env_id, num_timesteps, render_timesteps, render_time, seed):
 	dir  = logger.get_dir()
 	with open("scripts/data/data_directories.txt", 'a') as file:
 		file.write(dir+"\n")
+	with open(dir + "/metadata.txt", 'w') as file:
+		file.write(task + "," + str(num_timesteps))
 	results_plotter_terminal.plot_results([dir], num_timesteps, results_plotter_terminal.X_TIMESTEPS, "Target Set Gridworld") 
 	#for this to have at least 99 episodes. See line 20 in rolling_window in results_plotter.py from open ai baselines 
 	#If there are too few samples, that dimension will be negative and numpy will cause this to crash
@@ -34,10 +41,11 @@ def train(env_id, num_timesteps, render_timesteps, render_time, seed):
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("num_timesteps", type=float)
+	parser.add_argument("task", type=str)
 	parser.add_argument("render_timesteps", type=float , help="will render these last many timesteps")
 	parser.add_argument("render_time", type=float , help="will render each frame for at least this much time")
 	args = parser.parse_args()
-	train(None, args.num_timesteps, args.render_timesteps, args.render_time, None)
+	train(None, args.num_timesteps, args.render_timesteps, args.render_time, args.task, None)
 
 if __name__ == '__main__':
 	main()

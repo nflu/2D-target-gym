@@ -34,7 +34,10 @@ class TargetEnv(gym.Env):
 		return np.append(point, self.target(point))
 
 	def _get_reward(self):
-		return self.lastLambda - self.state[-1] #formulation is negated so that reward can be maximized
+		#return self.lastLambda - self.state[-1] #formulation is negated so that reward can be maximized
+		if self.curr_step >= self.timeHorizon:
+			return -self.target(self.state[:2])
+		return 0
 
 	def _step(self, action):
 		self._take_action(action)
