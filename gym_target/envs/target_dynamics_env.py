@@ -14,7 +14,8 @@ class TargetDynamicsEnv(gym.Env):
 		maxLambda = np.sqrt((2*boxSizeX)**2 + (2*boxSizeY)**2) #maximum distance between any two points in the space
 		maxVelocity = maxLambda / self.timestep_size #velocity to move the maximum distance in minimum time
 		#maxAccel = maxVelocity / self.timestep_size #I think this is unreasonably high
-		maxAccel = 100.0
+		maxAccel = 1000.0 #I'm temporarily limiting it to this to make training easier
+
 		self.high = np.array([boxSizeX, boxSizeY, maxVelocity, maxVelocity, maxLambda, boxSizeX, boxSizeY, 2*np.pi, maxAccel])
 		#note that this describes the limits on the observation space.
 		#right now the observation space is the state vector concatenated with the target set point
@@ -22,7 +23,7 @@ class TargetDynamicsEnv(gym.Env):
 		#(x, y, x', y', lambda)
 		#if the dimension is increased and the new dimensions will be used in the observation
 		#the dimension of the box must also increase.
-		self.action_space = spaces.Box(low = -self.high[-2:], high = self.high[-2:]) #direction and magnitude
+		self.action_space = spaces.Box(low = np.array([1.0,5.0]), high = self.high[-2:]) #direction and magnitude
 		self.observation_space = spaces.Box(low = -self.high[:self.stateDim+2], high = self.high[:self.stateDim+2], dtype = np.float32)
 		self.curr_step = 0
 
@@ -37,7 +38,8 @@ class TargetDynamicsEnv(gym.Env):
 		return np.append(np.append(point, np.zeros(self.stateDim - 3)), self.target(point)) #start at stationary point
 
 	def _get_reward(self):
-		return self.lastLambda - self.state[-1] #formulation is negated so that reward can be maximized
+		#return self.lastLambda - self.state[-1] #formulation is negated so that reward can be maximized
+		return -self.target(self.state[:2])
 
 	def _step(self, action):
 		self._take_action(action)
@@ -63,8 +65,8 @@ class TargetDynamicsEnv(gym.Env):
 	def _take_action(self, action):
 		self.state[0] = self.state[0] + self.timestep_size * self.state[2]
 		self.state[1] = self.state[1] + self.timestep_size * self.state[3]
-		self.state[2] = self.state[2] + self.timestep_size * np.cos(action[0]) * action[1]
-		self.state[3] = self.state[3] + self.timestep_size * np.sin(action[0]) * action[1]
+		self.state[2] = self.state[2] + self.timestep_size * np.cos(action[0]) * action[1] * 100.0
+		self.state[3] = self.state[3] + self.timestep_size * np.sin(action[0]) * action[1] * 100.0
 		if abs(self.state[0]) > self.high[0]:
 			self.state[2] = -self.state[2]
 		if abs(self.state[1]) > self.high[1]:

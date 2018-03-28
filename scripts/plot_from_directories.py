@@ -1,5 +1,6 @@
 import sys
-sys.path.insert(0, '/home/trustlap41/gym-target/openai_modified/')
+#sys.path.insert(0, '/home/trustlap41/gym-target/openai_modified/')
+sys.path.insert(0, '/Users/Neil/gym-target/openai_modified/')
 import argparse
 import results_plotter_terminal
 from glob import glob

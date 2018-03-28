@@ -1,5 +1,6 @@
 import sys
-sys.path.insert(0, '/home/trustlap41/gym-target/')
+#sys.path.insert(0, '/home/trustlap41/gym-target/')
+sys.path.insert(0, '/Users/Neil/gym-target/openai_modified/')
 import gym
 import gym_target
 import numpy as np
