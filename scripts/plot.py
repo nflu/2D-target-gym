@@ -17,7 +17,6 @@ def main():
 	args = parser.parse_args()
 	if args.data_file == None:
 		args.data_file = "monitor.csv"
-
 	with open(args.directory_file) as f:
 		l = []
 		for line in f:
@@ -26,14 +25,21 @@ def main():
 			l.append(line)
 		i = 0
 		for file in l:
-			data = get_reward(np.genfromtxt(file, delimiter=',', skip_header=2,
-                     skip_footer=10, names=['r', 'l', 't']))
-			plt.figure(i)
-			plt.plot(data)
-			plt.xlabel('time steps taken')
-			plt.ylabel('reward')
-			plt.title(file)
-			i+=1
+			exists = True
+			try:
+				data = get_reward(np.genfromtxt(file, delimiter=',', skip_header=2,
+	                     skip_footer=10, names=['r', 'l', 't']))
+			except OSError as e:
+				print(e)
+				exists = False
+			if exists:
+				plt.figure(i)
+				plt.plot(data, 'rx')
+				plt.xlabel('time steps taken')
+				plt.ylabel('reward')
+				plt.title(file)
+				i+=1
+
 	plt.show()
 
 def get_reward(data):
