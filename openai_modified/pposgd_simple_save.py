@@ -154,7 +154,7 @@ def learn(env, policy_fn, *,
             basePath=os.path.dirname(os.path.abspath(__file__))
             modelF= basePath + '/' + save_model_with_prefix+"_afterIter_"+str(iters_so_far)+".model"
             os.makedirs(os.path.dirname(modelF), exist_ok=True)
-            saver = tf.train.Saver(var_list=var_list)
+            saver = tf.train.Saver()
             saver.save(tf.get_default_session(), modelF)
             logger.log("Saved model to file :{}".format(modelF))
 
@@ -234,7 +234,7 @@ def learn(env, policy_fn, *,
             logger.dump_tabular()
 
         # Save model after every 500 iters if a file name to save is given
-        if iters_so_far % 500 ==0:
+        if iters_so_far % 10 ==0:
             save()
 
 
