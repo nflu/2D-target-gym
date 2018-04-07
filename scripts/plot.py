@@ -1,6 +1,7 @@
 #using the openai plotting script became too much of a pain so made this and it works much better
-
+from scipy import interpolate
 import sys
+import re
 #sys.path.insert(0, '/home/trustlap41/gym-target/openai_modified/')
 sys.path.insert(0, '/Users/Neil/gym-target/openai_modified/')
 import argparse
@@ -13,6 +14,7 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("directory_file", type=str, help="this is a text file with the directories of data separated by new lines")
 	parser.add_argument("-f", "--data_file", type=str, help="Plots data from files with this name in the listed directories. Default is monitor.csv") #optional
+	parser.add_argument("-l", "--last_n_plot", type=int, help="Plots data from this many most recent files. (e.g. last_n_plot = 1 plots the most recently saved run)")
     #need to type -f before argument in command line
 	args = parser.parse_args()
 	if args.data_file == None:
@@ -24,7 +26,8 @@ def main():
 			line += "/" + args.data_file
 			l.append(line)
 		i = 0
-		for file in l:
+		fig, axes = plt.subplots(args.last_n_plot)
+		for file in l[-args.last_n_plot:]:
 			exists = True
 			try:
 				data = get_reward(np.genfromtxt(file, delimiter=',', skip_header=2,
@@ -33,12 +36,21 @@ def main():
 				print(e)
 				exists = False
 			if exists:
-				plt.figure(i)
-				plt.plot(data, 'rx')
-				plt.xlabel('time steps taken')
-				plt.ylabel('reward')
-				plt.title(file)
+				task = ""
+				try:
+					directory = file[:-len(args.data_file)]
+					with open(directory + "metadata.txt") as metadata:
+						task = re.sub(r',.*', '', metadata.readline())
+				except OSError as e:
+					pass
+				tck = interpolate.splrep(range(len(data)) , data, k=2, s=2e3 * len(data))
+				axes[i].plot(data, 'ko', markersize=1)
+				axes[i].plot(interpolate.splev(range(len(data)),tck))
+				axes[i].set(xlabel='time steps', ylabel='reward')
+				title  = task + " " + re.sub(r'.*openai-', '', file)
+				axes[i].set_title(title)
 				i+=1
+		fig.subplots_adjust(hspace=0.5)
 
 	plt.show()
 
