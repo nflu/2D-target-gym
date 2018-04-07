@@ -3,6 +3,7 @@ from baselines import logger
 import baselines.common.tf_util as U
 import tensorflow as tf, numpy as np
 import time
+import datetime
 import os
 from baselines.common.mpi_adam import MpiAdam
 from baselines.common.mpi_moments import mpi_moments
@@ -151,13 +152,16 @@ def learn(env, policy_fn, *,
 
     def save():
         if save_model_with_prefix:
-            basePath=os.path.dirname(os.path.abspath(__file__))
-            modelF= basePath + '/' + save_model_with_prefix+"_afterIter_"+str(iters_so_far)+".model"
+            basePath=os.path.dirname(os.path.abspath(__file__)) 
+            modelF= basePath + '/' + task + '/' + save_model_with_prefix + save_dir + "_afterIter_"+str(iters_so_far)+".model"
+            #ie: grid/save_model_with_prefix4-6-2018--18-17/_afterIter_1000.model
             os.makedirs(os.path.dirname(modelF), exist_ok=True)
             saver = tf.train.Saver()
             saver.save(tf.get_default_session(), modelF)
             logger.log("Saved model to file :{}".format(modelF))
 
+    now = datetime.datetime.now()
+    save_dir = str(now.month) + "-" + str(now.day) + "-" + str(now.year) + "--" str(now.hour) + "-" + str(now.minute) 
     while True:
         if callback: callback(locals(), globals())
         if max_timesteps and timesteps_so_far >= max_timesteps:
@@ -233,8 +237,8 @@ def learn(env, policy_fn, *,
         if MPI.COMM_WORLD.Get_rank()==0:
             logger.dump_tabular()
 
-        # Save model after every 500 iters if a file name to save is given
-        if iters_so_far % 10 ==0:
+        # Save model after every 100 iters if a file name to save is given
+        if iters_so_far % 100 ==0:
             save()
 
 

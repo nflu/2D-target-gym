@@ -100,7 +100,7 @@ def learn(env, policy_fn, *,
         adam_epsilon=1e-5,
         schedule='constant', # annealing for stepsize parameters (epsilon and adam)
         render_timesteps = 0, #will render the last render_timesteps
-        render_time = 0, #will pause on each frame for at least this time
+        render_time = 0 #will pause on each frame for at least this time
         ):
     # Setup losses and stuff
     # ----------------------------------------
