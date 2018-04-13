@@ -34,12 +34,21 @@ class TargetEnv(gym.Env):
 		return np.append(point, self.target(point))
 
 	def _get_reward(self):
-		#return self.lastLambda - self.state[-1] #formulation is negated so that reward can be maximized
-		if self.curr_step >= self.timeHorizon:
+		'''
+		return -self.target(self.state[:2]) #1
+		
+		if self.curr_step >= self.timeHorizon: #2
 			return -self.target(self.state[:2])
 		return 0
 
-	def _step(self, action):
+		if self.curr_step >= self.timeHorizon: #3 
+			return -self.state[-1] 			   #needs lambda to record min distance
+		return 0
+		
+		'''
+		return self.lastLambda - self.state[-1] #4,5 change lambda appropriately
+		
+	def step(self, action):
 		self._take_action(action)
 		self.curr_step += 1
 		reward = self._get_reward()
@@ -47,7 +56,7 @@ class TargetEnv(gym.Env):
 		episode_over = self.curr_step >= self.timeHorizon
 		return ob , reward, episode_over, {}
 
-	def _reset(self):
+	def reset(self):
 		self.targetPoint = self.randomPoint()
 		def l(point):
 			return np.linalg.norm(point - self.targetPoint)
@@ -67,7 +76,8 @@ class TargetEnv(gym.Env):
 			i = np.argmax(np.absolute(self.state[:2]))
 			self.state[i] -= np.sign(self.state[i])*self.stepSize
 		self.lastLambda = self.state[-1]
-		self.state[-1] = min(self.state[-1], self.target(self.state[:2]))
+		#self.state[-1] = min(self.state[-1], self.target(self.state[:2])) #3 and 4
+		self.state[-1] = self.target(self.state[:2]) # 5
 
 	def _render(self, mode="human", close=False):
 		# I have this problem currently https://github.com/openai/gym/issues/893

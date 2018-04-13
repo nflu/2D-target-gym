@@ -89,7 +89,8 @@ def learn(env, policy_fn, *,
         adam_epsilon=1e-5,
         schedule='constant', # annealing for stepsize parameters (epsilon and adam)
         save_model_with_prefix, # Save the model with this prefix after 500 iters
-        restore_model_from_file# Load the states/model from this file.
+        restore_model_from_file,# Load the states/model from this file.
+        task
         ):
     # Setup losses and stuff
     # ----------------------------------------
@@ -152,16 +153,17 @@ def learn(env, policy_fn, *,
 
     def save():
         if save_model_with_prefix:
-            basePath=os.path.dirname(os.path.abspath(__file__)) 
-            modelF= basePath + '/' + task + '/' + save_model_with_prefix + save_dir + "_afterIter_"+str(iters_so_far)+".model"
-            #ie: grid/save_model_with_prefix4-6-2018--18-17/_afterIter_1000.model
+            basePath=os.path.dirname(os.path.abspath(__file__))
+            modelF= basePath + '/models/' + task + '/' + save_model_with_prefix + save_dir + "_afterIter_"+str(iters_so_far)+".model"
+            #ie: models/grid/save_model_with_prefix4-6-2018--18-17/_afterIter_1000.model
             os.makedirs(os.path.dirname(modelF), exist_ok=True)
             saver = tf.train.Saver()
             saver.save(tf.get_default_session(), modelF)
             logger.log("Saved model to file :{}".format(modelF))
 
+
     now = datetime.datetime.now()
-    save_dir = str(now.month) + "-" + str(now.day) + "-" + str(now.year) + "--" str(now.hour) + "-" + str(now.minute) 
+    save_dir = str(now.month) + "-" + str(now.day) + "-" + str(now.year) + "--" + str(now.hour) + "-" + str(now.minute) 
     while True:
         if callback: callback(locals(), globals())
         if max_timesteps and timesteps_so_far >= max_timesteps:

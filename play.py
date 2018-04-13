@@ -26,15 +26,13 @@ def play_from_model(task, num_timesteps, restore_file):
 		with tf.Session().as_default():
 			pi=policy_fn("pi", env.observation_space, env.action_space)
 			var_list = pi.get_trainable_variables()
-			print(var_list)
 			saver=tf.train.Saver()
 			saver.restore(tf.get_default_session(), restore_file)
 			logger.log("Loaded model from {}".format(restore_file))
 			var_list = pi.get_trainable_variables()
-			print(var_list)
 			for _ in range(num_timesteps):
 				a, vpred = pi.act(True, ob)
-				ob, r, over, d = env._step(a)
+				ob, r, over, d = env.step(a)
 				env._render()
 				if over:
 					env._close()
@@ -43,7 +41,7 @@ def play_from_model(task, num_timesteps, restore_file):
 	else:
 		for _ in range(num_timesteps):
 			a = env.action_space.sample()
-			ob, r, over, d = env._step(a)
+			ob, r, over, d = env.step(a)
 			env._render()
 			if over:
 				env._close()

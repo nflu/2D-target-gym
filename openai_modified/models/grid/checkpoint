@@ -1,0 +1,2 @@
+model_checkpoint_path: "/Users/Neil/gym-target/openai_modified/models/grid/E4-7-2018--21-8_afterIter_300.model"
+all_model_checkpoint_paths: "/Users/Neil/gym-target/openai_modified/models/grid/E4-7-2018--21-8_afterIter_300.model"
