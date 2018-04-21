@@ -3,10 +3,11 @@ from baselines import logger
 from baselines.ppo1 import mlp_policy
 from baselines import bench
 from openai_modified import pposgd_simple_save
+from openai_modified import beta_policy
 import gym
 import gym_target
 import argparse
-from  openai_modified import results_plotter_terminal
+from openai_modified import results_plotter_terminal
 
 #TODO put in some check that save_prefix is valid so ppo doesn't crash
 def train(env_id, num_timesteps, save_prefix, restore_file, task, seed):
@@ -24,9 +25,9 @@ def train(env_id, num_timesteps, save_prefix, restore_file, task, seed):
 	pposgd_simple_save.learn(env, policy_fn, 
 		max_timesteps = num_timesteps, save_model_with_prefix=save_prefix, restore_model_from_file=restore_file, gamma=1.0, timesteps_per_actorbatch = 10000,
 		clip_param=0.10, entcoeff=0.02,
-            optim_epochs=10, optim_stepsize=1e-4, optim_batchsize=64,
-             lam=0.95, schedule='constant', task = task
-        )
+			optim_epochs=10, optim_stepsize=1e-4, optim_batchsize=64,
+			 lam=0.95, schedule='constant', task = task
+		)
 	dir  = logger.get_dir()
 	with open("scripts/data/mac_directories.txt", 'a') as file:
 		file.write(dir+"\n")
