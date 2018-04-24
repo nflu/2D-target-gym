@@ -12,5 +12,5 @@ class SigmoidPolicy(mlp_policy.MlpPolicy):
 
     def act(self, stochastic, ob):
         ac , vpred = super(SigmoidPolicy, self).act(stochastic, ob)
-        ac = ac * (self.ac_space.high-self.ac_space.low) + self.ac_space.low
+        ac = expit(ac) * (self.ac_space.high-self.ac_space.low) + self.ac_space.low
         return ac, vpred
